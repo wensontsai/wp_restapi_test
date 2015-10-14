@@ -333,6 +333,13 @@ function twentyfifteen_search_form_modify( $html ) {
 }
 add_filter( 'get_search_form', 'twentyfifteen_search_form_modify' );
 
+add_filter( 'rest_prepare_post', 'dt_use_raw_post_content', 10, 3 );
+function dt_use_raw_post_content( $data, $post, $request ){
+	$data->data['content']['plaintext'] = $post->post_content;
+	return $data;
+}
+
+
 /**
  * Implement the Custom Header feature.
  *
