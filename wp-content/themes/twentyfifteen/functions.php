@@ -333,12 +333,54 @@ function twentyfifteen_search_form_modify( $html ) {
 }
 add_filter( 'get_search_form', 'twentyfifteen_search_form_modify' );
 
+
+
+// stripping tags off content //
 add_filter( 'rest_prepare_post', 'dt_use_raw_post_content', 10, 3 );
 function dt_use_raw_post_content( $data, $post, $request ){
 	$data->data['content']['plaintext'] = $post->post_content;
 	return $data;
 }
 
+// registering plaintext field //
+add_action( 'rest_api_init', 'dt_register_api_hooks' );
+function dt_register_api_hooks() {
+
+    // Add the plaintext content to GET requests for individual posts
+    register_api_field(
+        'post',
+        'plaintext',
+        array(
+            'get_callback'    => 'dt_return_plaintext_content',
+        )
+    );
+}
+
+// Return plaintext content for posts
+function dt_return_plaintext_content( $object, $field_name, $request ) {
+    return strip_tags( html_entity_decode( $object['content']['rendered'] ) );
+}
+
+
+// // Add deep-thoughts/v1/get-all-post-ids route
+// register_rest_route( 'deep-thoughts/v1', '/get-all-post-ids/', array(
+//     'methods' => 'GET',
+//     'callback' => 'dt_get_all_post_ids',
+// ) );
+// // Return all post IDs
+// function dt_get_all_post_ids() {
+//     if ( false === ( $all_post_ids = get_transient( 'dt_all_post_ids' ) ) ) {
+//         $all_post_ids = get_posts( array(
+//             'numberposts' => -1,
+//             'post_type'   => 'post',
+//             'fields'      => 'ids',
+//         ) );
+//         // cache for 2 hours
+//         set_transient( 'dt_all_post_ids', $all_post_ids, 60*60*2 );
+//     }
+
+//     return $all_post_ids;
+// }
 
 /**
  * Implement the Custom Header feature.
